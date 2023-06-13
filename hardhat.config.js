@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
+require('hardhat-docgen');
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -21,4 +22,9 @@ module.exports = {
     gasReporter: {
         enabled: true,
     },
+    docgen: {
+        path: './docs',
+        clear: true,
+        runOnCompile: true,
+    }
 };

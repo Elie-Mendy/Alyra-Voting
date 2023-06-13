@@ -3,6 +3,9 @@
 pragma solidity 0.8.20;
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title A voting contract
+/// @author Elie Mendy
+/// @notice can only be used for a voting use case
 contract Voting is Ownable {
     uint public winningProposalID;
 
@@ -17,6 +20,13 @@ contract Voting is Ownable {
         uint voteCount;
     }
 
+    /// @notice Event triggered when the owner modify the workflow status
+    /// @param RegisteringVoters registering session started
+    /// @param ProposalsRegistrationStarted proposal registration session started
+    /// @param ProposalsRegistrationEnded proposal registration session session stoped
+    /// @param VotingSessionStarted voting session started
+    /// @param VotingSessionEnded voting session session stoped
+    /// @param VotesTallied votes tallied
     enum WorkflowStatus {
         RegisteringVoters,
         ProposalsRegistrationStarted,
@@ -26,7 +36,7 @@ contract Voting is Ownable {
         VotesTallied
     }
     
-    /// @notice workflow status 
+    /// @notice workflow status variable
     WorkflowStatus public workflowStatus;
 
     /// @notice list that will contain proposals 
