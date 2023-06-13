@@ -25,17 +25,35 @@ contract Voting is Ownable {
         VotingSessionEnded,
         VotesTallied
     }
-
+    
+    /// @notice workflow status 
     WorkflowStatus public workflowStatus;
+
+    /// @notice list that will contain proposals 
     Proposal[] proposalsArray;
+
+    /// @notice whilelist that will contain voters 
     mapping(address => Voter) voters;
 
+    /// @notice Event triggered when a voter is registered
+    /// @param voterAddress the voter's address 
     event VoterRegistered(address voterAddress);
+
+    /// @notice Event triggered when the owner modify the workflow status
+    /// @param previousStatus the previous workflow status
+    /// @param newStatus the new workflow status 
     event WorkflowStatusChange(
         WorkflowStatus previousStatus,
         WorkflowStatus newStatus
     );
+
+    /// @notice Event triggered when a proposal is registered
+    /// @param proposalId the id of the registered proposal
     event ProposalRegistered(uint proposalId);
+
+    /// @notice Event triggered when a proposal is registered
+    /// @param voter the voter's address
+    /// @param proposalId the id of the registered proposal
     event Voted(address voter, uint proposalId);
 
     modifier onlyVoters() {
@@ -47,12 +65,20 @@ contract Voting is Ownable {
 
     // ::::::::::::: GETTERS ::::::::::::: //
 
+    /// @notice fetch data of a voter.
+    /// @param _addr voter's address.
+    /// @dev the caller must be a voter.
+    /// @return Voter the voter's information.
     function getVoter(
         address _addr
     ) external view onlyVoters returns (Voter memory) {
         return voters[_addr];
     }
 
+    /// @notice fetch a proposal.
+    /// @param _id, the id of the proposal.
+    /// @dev the caller must be authorized.
+    /// @return Proposal, a representation of a proposal.
     function getOneProposal(
         uint _id
     ) external view onlyVoters returns (Proposal memory) {
@@ -61,6 +87,10 @@ contract Voting is Ownable {
 
     // ::::::::::::: REGISTRATION ::::::::::::: //
 
+    /// @notice store a new address in the whitelist.
+    /// @param _addr the new voter's address.
+    /// @dev can only be called by the owner.
+    /// @dev emit a VoterRegistered event.
     function addVoter(address _addr) external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.RegisteringVoters,
@@ -74,6 +104,11 @@ contract Voting is Ownable {
 
     // ::::::::::::: PROPOSAL ::::::::::::: //
 
+    /// @notice store a new proposition in the proposals Array.
+    /// @notice register the author of the proposal in the proposalRegister mapping.
+    /// @param _desc the description of the new proposition.
+    /// @dev can only be called by a voter.
+    /// @dev emit a ProposalRegistered event.
     function addProposal(string calldata _desc) external onlyVoters {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationStarted,
@@ -93,6 +128,11 @@ contract Voting is Ownable {
 
     // ::::::::::::: VOTE ::::::::::::: //
 
+    /// @notice increment the voteCount attribute of a given proposal.
+    /// @notice update the Voter structure of the caller (hasVoted, votedProposalId).
+    /// @param _id, the id of the selected proposal.
+    /// @dev can only be called by a voter.
+    /// @dev emit a Voted event.
     function setVote(uint _id) external onlyVoters {
         require(
             workflowStatus == WorkflowStatus.VotingSessionStarted,
@@ -110,6 +150,10 @@ contract Voting is Ownable {
 
     // ::::::::::::: STATE ::::::::::::: //
 
+    /// @notice start the Proposal Registration Session.
+    /// @dev can only be called by the owner.
+    /// @dev update the workflowStatus variable.
+    /// @dev emit a WorkflowStatusChange event.
     function startProposalsRegistering() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.RegisteringVoters,
@@ -127,6 +171,10 @@ contract Voting is Ownable {
         );
     }
 
+    /// @notice stop the Proposal Registration Session.
+    /// @dev can only be called by the owner.
+    /// @dev update the workflowStatus variable.
+    /// @dev emit a WorkflowStatusChange event.
     function endProposalsRegistering() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationStarted,
@@ -139,6 +187,10 @@ contract Voting is Ownable {
         );
     }
 
+    /// @notice start the Voting Session.
+    /// @dev can only be called by the owner.
+    /// @dev update the workflowStatus variable.
+    /// @dev emit a WorkflowStatusChange event.
     function startVotingSession() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationEnded,
@@ -151,6 +203,10 @@ contract Voting is Ownable {
         );
     }
 
+    /// @notice stop the Voting Session.
+    /// @dev can only be called by the owner.
+    /// @dev update the workflowStatus variable.
+    /// @dev emit a WorkflowStatusChange event.
     function endVotingSession() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.VotingSessionStarted,
@@ -163,6 +219,11 @@ contract Voting is Ownable {
         );
     }
 
+    /// @notice tally the votes.
+    /// @dev can only be called by the owner.
+    /// @dev update the workflowStatus variable.
+    /// @dev call the setWinningProposalId() function.
+    /// @dev emit a WorkflowStatusChange event.
     function tallyVotes() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.VotingSessionEnded,
